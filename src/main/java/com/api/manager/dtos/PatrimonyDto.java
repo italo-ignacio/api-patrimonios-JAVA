@@ -1,5 +1,7 @@
 package com.api.manager.dtos;
 
+import com.api.manager.models.UserModel;
+
 import javax.validation.constraints.NotBlank;
 
 public class PatrimonyDto {
@@ -8,8 +10,8 @@ public class PatrimonyDto {
     private String name;
     @NotBlank
     private String cod;
-    @NotBlank
-    private Long owner;
+
+    private UserModel user;
 
     public String getName() {
         return name;
@@ -27,11 +29,11 @@ public class PatrimonyDto {
         this.cod = cod;
     }
 
-    public Long getOwner() {
-        return owner;
+    public UserModel getUser() {
+        return user;
     }
 
-    public void setOwner(Long owner) {
-        this.owner = owner;
+    public void setUser(UserModel user) {
+        this.user = user;
     }
 }
