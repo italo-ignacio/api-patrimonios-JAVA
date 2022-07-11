@@ -2,7 +2,6 @@ package com.api.manager.models;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name="TB_PATRIMONY")
@@ -10,14 +9,14 @@ public class PatrimonyModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    private Long id;
     @Column(nullable = false)
     private String name;
     @Column(nullable = false, unique = true)
     private String cod;
-    @Column(nullable = false)
+
     private String note;
-    @Column(nullable = false)
+
     private String details;
 
     @JoinColumn(name = "owner")
@@ -29,11 +28,11 @@ public class PatrimonyModel {
     private LocalDateTime  updatedAt;
 
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
