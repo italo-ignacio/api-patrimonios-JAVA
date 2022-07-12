@@ -17,13 +17,9 @@ public class UserService {
     UserRepository userRepository;
 
     @Transactional
-    public UserModel save(UserModel userModel) {
-        return userRepository.save(userModel);
-    }
+    public UserModel save(UserModel userModel) {return userRepository.save(userModel);}
 
-    public List<UserModel> findAll() {
-        return userRepository.findAll();
-    }
+    public List<UserModel> findAll() {return userRepository.findAll();}
 
     public Optional<UserModel> findById(Long id) {
         return userRepository.findById(id);

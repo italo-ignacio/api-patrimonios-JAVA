@@ -18,8 +18,8 @@ public class PatrimonyModel {
     private String note;
 
     private String details;
+
     @ManyToOne
-    @JoinColumn(name = "user_id")
     private UserModel user;
     @Column(nullable = false)
     private LocalDateTime createdAt;

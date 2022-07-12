@@ -2,6 +2,8 @@ package com.api.manager.models;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="TB_USER")
@@ -21,6 +23,9 @@ public class UserModel  {
     private LocalDateTime createdAt;
     @Column(nullable = false)
     private LocalDateTime  updatedAt;
+
+    @OneToMany(cascade = CascadeType.ALL,mappedBy = "user")
+    private List<PatrimonyModel> patrimonies ;
 
     public Long getId() {
         return id;
@@ -76,5 +81,13 @@ public class UserModel  {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public List<PatrimonyModel> getPatrimonies() {
+        return patrimonies;
+    }
+
+    public void setPatrimonies(List<PatrimonyModel> patrimonies) {
+        this.patrimonies = patrimonies;
     }
 }

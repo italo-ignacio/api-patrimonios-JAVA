@@ -3,6 +3,7 @@ package com.api.manager.dtos;
 import com.api.manager.models.UserModel;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 
 public class PatrimonyDto {
 

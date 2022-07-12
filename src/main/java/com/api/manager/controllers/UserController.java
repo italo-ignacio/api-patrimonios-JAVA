@@ -1,5 +1,6 @@
 package com.api.manager.controllers;
 
+import com.api.manager.configs.BCryptPasswordEncoderConfig;
 import com.api.manager.dtos.UserDto;
 import com.api.manager.models.UserModel;
 import com.api.manager.services.UserService;
@@ -7,6 +8,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -23,13 +25,18 @@ public class UserController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    BCryptPasswordEncoder bCryptPasswordEncoder;
+
     @PostMapping
     public ResponseEntity<Object> saveUser(@RequestBody @Valid UserDto userDto){
         var userModel = new UserModel();
         BeanUtils.copyProperties(userDto,userModel);
         userModel.setCreatedAt(LocalDateTime.now());
         userModel.setUpdatedAt(LocalDateTime.now());
+        userModel.setPassword(bCryptPasswordEncoder.encode(userModel.getPassword()));
         userModel.setIs_admin(false);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(userModel));
     }
 
@@ -55,7 +62,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
         userService.delete(userModelOptional.get());
-        return ResponseEntity.status(HttpStatus.OK).body("User deleted successfullly");
+        return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully");
     }
 
     @PutMapping("/{id}")
@@ -67,7 +74,7 @@ public class UserController {
         var userModel = userModelOptional.get();
         userModel.setName(userDto.getName());
         userModel.setEmail(userDto.getEmail());
-        userModel.setPassword(userDto.getPassword());
+        userModel.setPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));
         userModel.setUpdatedAt(LocalDateTime.now());
 
         return ResponseEntity.status(HttpStatus.OK).body(userService.save(userModel));
