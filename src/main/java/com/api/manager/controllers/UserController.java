@@ -1,10 +1,8 @@
 package com.api.manager.controllers;
 
-import com.api.manager.configs.BCryptPasswordEncoderConfig;
 import com.api.manager.dtos.UserDto;
 import com.api.manager.models.UserModel;
 import com.api.manager.services.UserService;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +11,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -30,14 +30,31 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<Object> saveUser(@RequestBody @Valid UserDto userDto){
+        Map<String, String> response = new HashMap<>();
         var userModel = new UserModel();
-        BeanUtils.copyProperties(userDto,userModel);
+
+        if(userDto.getName()!=null){userModel.setName(userDto.getName());}
+        if(userDto.getEmail()!=null){ userModel.setEmail(userDto.getEmail());}
+        if(userDto.getPassword()!=null){userModel.setPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));}
+
         userModel.setCreatedAt(LocalDateTime.now());
         userModel.setUpdatedAt(LocalDateTime.now());
-        userModel.setPassword(bCryptPasswordEncoder.encode(userModel.getPassword()));
         userModel.setIs_admin(false);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(userModel));
+        try{
+            userService.save(userModel);
+            response.put("message", "User created successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }catch (Exception e){
+            String error = e.getCause().getCause().getMessage();
+            response.put("ERROR", "TRUE");
+            if(error.contains("Duplicate entry")){
+                response.put("message", "E-mail already exists");
+            }else {
+                response.put("message", "Could not created user");
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
     }
 
     @GetMapping
@@ -46,10 +63,13 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getOneUser(@PathVariable(value = "id") Long id){
+    public ResponseEntity<Object> getByIdUser(@PathVariable(value = "id") Long id){
+        Map<String, String> response = new HashMap<>();
         Optional<UserModel> userModelOptional = userService.findById(id);
         if(!userModelOptional.isPresent()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            response.put("ERROR", "TRUE");
+            response.put("message", "User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         return ResponseEntity.status(HttpStatus.OK).body(userModelOptional.get());
     }
@@ -57,26 +77,53 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteUser(@PathVariable(value = "id")Long id){
+        Map<String, String> response = new HashMap<>();
         Optional<UserModel> userModelOptional = userService.findById(id);
         if(!userModelOptional.isPresent()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            response.put("ERROR", "TRUE");
+            response.put("message", "User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
-        userService.delete(userModelOptional.get());
-        return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully");
+        try{
+            userService.delete(userModelOptional.get());
+            response.put("message", "Successfully deleted");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }catch (Exception e){
+            response.put("ERROR", "TRUE");
+            response.put("message", "Could not delete");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateUser(@PathVariable(value = "id")Long id,@RequestBody @Valid UserDto userDto){
+        Map<String, String> response = new HashMap<>();
         Optional<UserModel> userModelOptional = userService.findById(id);
         if(!userModelOptional.isPresent()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            response.put("ERROR", "TRUE");
+            response.put("message", "User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         var userModel = userModelOptional.get();
-        userModel.setName(userDto.getName());
-        userModel.setEmail(userDto.getEmail());
-        userModel.setPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));
-        userModel.setUpdatedAt(LocalDateTime.now());
+        if(userDto.getName()!=null){response.put("Warning", "Cannot change the name");}
+        if(userDto.getEmail()!=null){ userModel.setEmail(userDto.getEmail());}
+        if(userDto.getPassword()!=null){userModel.setPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));}
 
-        return ResponseEntity.status(HttpStatus.OK).body(userService.save(userModel));
+        userModel.setUpdatedAt(LocalDateTime.now());
+        try{
+            userService.save(userModel);
+            response.put("message", "User updated successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }catch (Exception e){
+            String error = e.getCause().getCause().getMessage();
+            response.put("ERROR", "TRUE");
+            if(error.contains("Duplicate entry")){
+                response.put("message", "E-mail already exists");
+            }else {
+                response.put("message", "Could not update");
+            }
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
     }
 }

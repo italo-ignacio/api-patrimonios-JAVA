@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -44,5 +43,39 @@ public class PatrimonyController {
     @GetMapping
     public ResponseEntity<Iterable<PatrimonyModel>> getAllPatrimonies(){
         return ResponseEntity.status(HttpStatus.OK).body(patrimonyService.findAll());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getByIdPatrimony(@PathVariable(value = "id")Long id){
+        Optional<PatrimonyModel> patrimonyModelOptional = patrimonyService.findById(id);
+        if(!patrimonyModelOptional.isPresent()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Patrimony not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(patrimonyModelOptional.get());
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deletePatrimony(@PathVariable(value = "id")Long id){
+        Optional<PatrimonyModel> patrimonyModelOptional = patrimonyService.findById(id);
+        if(!patrimonyModelOptional.isPresent()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Patrimony not found");
+        }
+        patrimonyService.delete(patrimonyModelOptional.get());
+        return ResponseEntity.status(HttpStatus.OK).body("Deleted successfully");
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Object> updatePatrimony(@PathVariable(value = "id")Long id,@RequestBody PatrimonyDto patrimonyDto){
+        Optional<PatrimonyModel> patrimonyModelOptional = patrimonyService.findById(id);
+        if(!patrimonyModelOptional.isPresent()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Patrimony not found");
+        }
+        var patrimonyModel = patrimonyModelOptional.get();
+        if(patrimonyDto.getName() != null){patrimonyModel.setName(patrimonyDto.getName());}
+        if(patrimonyDto.getCod() != null){patrimonyModel.setCod(patrimonyDto.getCod());}
+        if(patrimonyDto.getNote() != null){patrimonyModel.setNote(patrimonyDto.getNote());}
+        if(patrimonyDto.getDetails() != null){patrimonyModel.setDetails(patrimonyDto.getDetails());}
+        patrimonyModel.setUpdatedAt(LocalDateTime.now());
+        patrimonyService.save(patrimonyModel);
+        return ResponseEntity.status(HttpStatus.OK).body("Update successfully");
     }
 }

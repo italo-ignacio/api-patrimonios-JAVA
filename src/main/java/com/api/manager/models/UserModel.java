@@ -10,7 +10,7 @@ import java.util.List;
 @Table(name="TB_USER")
 public class UserModel  {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @Column(nullable = false)
     private String name;
