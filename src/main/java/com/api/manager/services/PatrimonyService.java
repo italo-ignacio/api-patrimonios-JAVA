@@ -5,7 +5,6 @@ import com.api.manager.repositories.PatrimonyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 public class PatrimonyService {
@@ -13,9 +12,12 @@ public class PatrimonyService {
     @Autowired
     PatrimonyRepository patrimonyRepository;
 
-    public PatrimonyModel save(PatrimonyModel patrimonyModel) {return patrimonyRepository.save(patrimonyModel);}
 
-    public List<PatrimonyModel> findAll() {
+    public PatrimonyModel save(PatrimonyModel patrimonyModel) {
+        return patrimonyRepository.save(patrimonyModel);
+    }
+
+    public Iterable<PatrimonyModel> findAll() {
         return patrimonyRepository.findAll();
     }
 }

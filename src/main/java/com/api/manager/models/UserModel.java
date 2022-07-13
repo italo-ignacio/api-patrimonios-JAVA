@@ -2,6 +2,7 @@ package com.api.manager.models;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
 @Table(name="TB_USER")
 public class UserModel  {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
     @Column(nullable = false)
     private String name;
@@ -24,8 +25,9 @@ public class UserModel  {
     @Column(nullable = false)
     private LocalDateTime  updatedAt;
 
-    @OneToMany(cascade = CascadeType.ALL,mappedBy = "user")
-    private List<PatrimonyModel> patrimonies ;
+    @OneToMany
+    @JoinColumn(name ="owner_id" )
+    private List<PatrimonyModel> patrimonies = new ArrayList<>();
 
     public Long getId() {
         return id;

@@ -35,15 +35,14 @@ public class PatrimonyController {
         }
         var patrimonyModel = new PatrimonyModel();
         BeanUtils.copyProperties(patrimonyDto,patrimonyModel);
-
         patrimonyModel.setCreatedAt(LocalDateTime.now());
         patrimonyModel.setUpdatedAt(LocalDateTime.now());
-
+        patrimonyModel.setOwner(userModelOptional.get().getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(patrimonyService.save(patrimonyModel));
     }
 
     @GetMapping
-    public ResponseEntity<List<PatrimonyModel>> getAllPatrimonies(){
+    public ResponseEntity<Iterable<PatrimonyModel>> getAllPatrimonies(){
         return ResponseEntity.status(HttpStatus.OK).body(patrimonyService.findAll());
     }
 }

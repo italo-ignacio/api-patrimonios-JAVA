@@ -14,6 +14,8 @@ public class PatrimonyDto {
 
     private UserModel user;
 
+    private String note;
+    private String details;
     public String getName() {
         return name;
     }
@@ -36,5 +38,21 @@ public class PatrimonyDto {
 
     public void setUser(UserModel user) {
         this.user = user;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public String getDetails() {
+        return details;
+    }
+
+    public void setDetails(String details) {
+        this.details = details;
     }
 }

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class PatrimonyModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
     private String name;
@@ -19,7 +19,10 @@ public class PatrimonyModel {
 
     private String details;
 
+    @Column(nullable = false)
+    private String owner;
     @ManyToOne
+    @JoinColumn(name="owner_id")
     private UserModel user;
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -67,9 +70,7 @@ public class PatrimonyModel {
         this.details = details;
     }
 
-    public UserModel getUser() {
-        return user;
-    }
+
 
     public void setUser(UserModel user) {
         this.user = user;
@@ -81,6 +82,14 @@ public class PatrimonyModel {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public LocalDateTime getUpdatedAt() {
