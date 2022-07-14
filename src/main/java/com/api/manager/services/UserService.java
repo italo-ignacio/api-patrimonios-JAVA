@@ -21,9 +21,8 @@ public class UserService {
 
     public List<UserModel> findAll() {return userRepository.findAll();}
 
-    public Optional<UserModel> findById(Long id) {
-        return userRepository.findById(id);
-    }
+    public Optional<UserModel> findById(Long id) {return userRepository.findById(id);}
+
     @Transactional
     public void delete(UserModel userModel) {
         userRepository.delete(userModel);

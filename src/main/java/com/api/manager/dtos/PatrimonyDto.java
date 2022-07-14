@@ -13,10 +13,19 @@ public class PatrimonyDto {
 
     private UserModel user;
 
+    private String url;
     private String note;
     private String details;
     public String getName() {
         return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public void setName(String name) {
@@ -54,4 +63,6 @@ public class PatrimonyDto {
     public void setDetails(String details) {
         this.details = details;
     }
+
+
 }

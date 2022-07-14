@@ -19,8 +19,7 @@ public class PatrimonyModel {
 
     private String details;
 
-    @Column(nullable = false)
-    private String owner;
+    private String url;
     @ManyToOne
     @JoinColumn(name="owner_id")
     private UserModel user;
@@ -54,6 +53,14 @@ public class PatrimonyModel {
         this.cod = cod;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     public String getNote() {
         return note;
     }
@@ -70,8 +77,6 @@ public class PatrimonyModel {
         this.details = details;
     }
 
-
-
     public void setUser(UserModel user) {
         this.user = user;
     }
@@ -85,12 +90,9 @@ public class PatrimonyModel {
     }
 
     public String getOwner() {
-        return owner;
+        return this.user.getName();
     }
 
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;

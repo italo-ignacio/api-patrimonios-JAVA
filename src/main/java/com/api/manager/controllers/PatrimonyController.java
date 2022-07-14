@@ -36,7 +36,6 @@ public class PatrimonyController {
         BeanUtils.copyProperties(patrimonyDto,patrimonyModel);
         patrimonyModel.setCreatedAt(LocalDateTime.now());
         patrimonyModel.setUpdatedAt(LocalDateTime.now());
-        patrimonyModel.setOwner(userModelOptional.get().getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(patrimonyService.save(patrimonyModel));
     }
 

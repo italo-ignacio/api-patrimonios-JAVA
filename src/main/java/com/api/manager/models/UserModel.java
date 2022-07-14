@@ -1,5 +1,7 @@
 package com.api.manager.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -17,6 +19,7 @@ public class UserModel  {
     @Column(nullable = false, unique = true)
     private String email;
     @Column(nullable = false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     @Column(nullable = false)
     private boolean is_admin;
@@ -25,7 +28,7 @@ public class UserModel  {
     @Column(nullable = false)
     private LocalDateTime  updatedAt;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name ="owner_id" )
     private List<PatrimonyModel> patrimonies = new ArrayList<>();
 

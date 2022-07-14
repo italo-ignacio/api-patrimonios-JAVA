@@ -1,14 +1,14 @@
 package com.api.manager.dtos;
 
 
+
 import javax.validation.constraints.Email;
 
 public class UserDto {
     private String name;
-    @Email
+    @Email(message = "Invalid email")
     private String email;
     private String password;
-
 
     public String getName() {
         return name;
@@ -33,4 +33,6 @@ public class UserDto {
     public void setPassword(String password) {
         this.password = password;
     }
+
+
 }
