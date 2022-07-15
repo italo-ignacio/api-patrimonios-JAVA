@@ -93,6 +93,10 @@ public class PatrimonyModel {
         return this.user.getName();
     }
 
+    public Long getIdOwner() {
+        return this.user.getId();
+    }
+
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;

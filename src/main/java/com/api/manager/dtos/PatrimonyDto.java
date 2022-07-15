@@ -6,16 +6,12 @@ import javax.validation.constraints.NotBlank;
 
 public class PatrimonyDto {
 
-    @NotBlank
     private String name;
-    @NotBlank
     private String cod;
-
-    private UserModel user;
-
     private String url;
     private String note;
     private String details;
+    private UserModel user;
     public String getName() {
         return name;
     }
@@ -40,13 +36,6 @@ public class PatrimonyDto {
         this.cod = cod;
     }
 
-    public UserModel getUser() {
-        return user;
-    }
-
-    public void setUser(UserModel user) {
-        this.user = user;
-    }
 
     public String getNote() {
         return note;
@@ -64,5 +53,11 @@ public class PatrimonyDto {
         this.details = details;
     }
 
+    public UserModel getUser() {
+        return user;
+    }
 
+    public void setUser(UserModel user) {
+        this.user = user;
+    }
 }

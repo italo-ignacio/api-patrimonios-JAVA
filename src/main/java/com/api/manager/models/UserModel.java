@@ -64,10 +64,9 @@ public class UserModel  {
         this.password = password;
     }
 
-    public boolean isIs_admin() {
+    public boolean getIs_admin() {
         return is_admin;
     }
-
     public void setIs_admin(boolean is_admin) {
         this.is_admin = is_admin;
     }

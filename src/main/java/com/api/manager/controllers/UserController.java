@@ -1,8 +1,12 @@
 package com.api.manager.controllers;
 
+import com.api.manager.dtos.LoginDto;
 import com.api.manager.dtos.UserDto;
 import com.api.manager.models.UserModel;
 import com.api.manager.services.UserService;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,10 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 
 @RestController
@@ -24,6 +25,8 @@ public class UserController {
 
     @Autowired
     UserService userService;
+
+
 
     @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -142,5 +145,33 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
+    @PostMapping("/login")
+    public ResponseEntity<Object> loginUser(@RequestBody @Valid LoginDto loginDto) {
+        Map<String, String> response = new HashMap<>();
+        Optional<UserModel> userModelOptional = userService.findByEmail(loginDto.getEmail());
+        Dotenv dotenv = Dotenv.load();
+        if (userModelOptional.isEmpty()) {
+            response.put("ERROR", "TRUE");
+            response.put("message", "User not found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
 
+        var user = userModelOptional.get();
+        boolean valid = bCryptPasswordEncoder.matches(loginDto.getPassword(), user.getPassword());
+        if(valid){
+            String is_admin = user.getIs_admin()?"true":"false";
+
+            String token = JWT.create().withSubject(user.getEmail()).
+                    withExpiresAt(new Date(System.currentTimeMillis() + Integer.parseInt(dotenv.get("TOKEN_EXPIRATION")))).
+                    sign(Algorithm.HMAC512(dotenv.get("TOKEN_SECRET")));
+
+            response.put("message", "Successfully logged in");
+            response.put("token", token);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }else{
+            response.put("ERROR", "TRUE");
+            response.put("message","Invalid password");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
 }

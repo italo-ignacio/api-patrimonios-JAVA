@@ -23,6 +23,8 @@ public class UserService {
 
     public Optional<UserModel> findById(Long id) {return userRepository.findById(id);}
 
+    public Optional<UserModel> findByEmail(String email) {return userRepository.findByEmail(email);}
+
     @Transactional
     public void delete(UserModel userModel) {
         userRepository.delete(userModel);
