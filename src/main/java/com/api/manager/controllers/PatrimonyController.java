@@ -61,7 +61,7 @@ public class PatrimonyController {
             if(!userModelOptional.isPresent()){
                 response.put("ERROR","True");
                 response.put("message","Invalid token");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
 
             var patrimonyModel = new PatrimonyModel();
@@ -182,12 +182,18 @@ public class PatrimonyController {
             }
             if(patrimonyModelOptional.get().getIdOwner() == userModelOptional.get().getId() || userModelOptional.get().getIs_admin()){
                 var patrimonyModel = patrimonyModelOptional.get();
-                if(patrimonyDto.getName() != null){patrimonyModel.setName(patrimonyDto.getName());}
-                if(patrimonyDto.getCod() != null){patrimonyModel.setCod(patrimonyDto.getCod());}
-                if(patrimonyDto.getNote() != null){patrimonyModel.setNote(patrimonyDto.getNote());}
-                if(patrimonyDto.getDetails() != null){patrimonyModel.setDetails(patrimonyDto.getDetails());}
-                if(patrimonyDto.getUrl() != null){patrimonyModel.setUrl(patrimonyDto.getUrl());}
-                if(patrimonyDto.getUser() != null){patrimonyModel.setUser(patrimonyDto.getUser());}
+                int sum = 0;
+                if(patrimonyDto.getName() != null){patrimonyModel.setName(patrimonyDto.getName());}else{sum++;}
+                if(patrimonyDto.getCod() != null){patrimonyModel.setCod(patrimonyDto.getCod());}else{sum++;}
+                if(patrimonyDto.getNote() != null){patrimonyModel.setNote(patrimonyDto.getNote());}else{sum++;}
+                if(patrimonyDto.getDetails() != null){patrimonyModel.setDetails(patrimonyDto.getDetails());}else{sum++;}
+                if(patrimonyDto.getUrl() != null){patrimonyModel.setUrl(patrimonyDto.getUrl());}else{sum++;}
+                if(patrimonyDto.getUser() != null){patrimonyModel.setUser(patrimonyDto.getUser());}else{sum++;}
+                if(sum == 6){
+                    response.put("message","Possible fields to update: (name, cod, note, details, url, user)");
+                    return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+                }
+
                 patrimonyModel.setUpdatedAt(LocalDateTime.now());
                 try{
                     patrimonyService.save(patrimonyModel);
@@ -207,7 +213,7 @@ public class PatrimonyController {
             }
             response.put("ERROR","True");
             response.put("message","UNAUTHORIZED");
-            response.put("Owner/Admin","Only the owner or admin can update the patrimony");
+            response.put("Owner/Admin","Only the owner or admin can update a patrimony");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
 
         }catch (Exception e){

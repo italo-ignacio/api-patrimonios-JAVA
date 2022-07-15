@@ -1,7 +1,6 @@
 package com.api.manager.dtos;
 
 
-
 import javax.validation.constraints.Email;
 
 public class UserDto {

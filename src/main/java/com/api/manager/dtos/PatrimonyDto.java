@@ -2,10 +2,8 @@ package com.api.manager.dtos;
 
 import com.api.manager.models.UserModel;
 
-import javax.validation.constraints.NotBlank;
 
 public class PatrimonyDto {
-
     private String name;
     private String cod;
     private String url;

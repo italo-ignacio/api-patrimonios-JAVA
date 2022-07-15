@@ -42,7 +42,7 @@ public class ValidationHandler extends ResponseEntityExceptionHandler{
             errors.put("Error","True");
             errors.put("Type","Unrecognized field");
             errors.put("message","Possible fields: (name, email, password)");
-        } else if (error.contains("5 known properties:")) {
+        } else if (error.contains("6 known properties:")) {
             errors.put("Error","True");
             errors.put("Type","Unrecognized field");
             errors.put("message","Possible fields: (name, cod, note, details, url)");

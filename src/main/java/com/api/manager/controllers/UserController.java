@@ -22,15 +22,22 @@ import java.util.*;
 @CrossOrigin(origins = "*",maxAge = 3600)
 @RequestMapping("/users")
 public class UserController {
-
+    public static final String PREFIX = "Bearer ";
     @Autowired
     UserService userService;
-
 
 
     @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    private String validateToken(String token){
+        Dotenv dotenv = Dotenv.load();
+        String email = JWT.require(Algorithm.HMAC512(dotenv.get("TOKEN_SECRET")))
+                .build()
+                .verify(token)
+                .getSubject();
+        return email;
+    }
     @PostMapping
     public ResponseEntity<Object> saveUser(@RequestBody @Valid UserDto userDto){
         Map<String, String> response = new HashMap<>();
@@ -67,6 +74,7 @@ public class UserController {
                 response.put("message", "E-mail already exists");
             }else {
                 response.put("message", "Could not created user");
+                response.put("err",error);
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
@@ -91,76 +99,137 @@ public class UserController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteUser(@PathVariable(value = "id")Long id){
+    public ResponseEntity<Object> deleteUser(@PathVariable(value = "id")Long id,@RequestHeader String Authorization){
         Map<String, String> response = new HashMap<>();
-        Optional<UserModel> userModelOptional = userService.findById(id);
-        if(!userModelOptional.isPresent()){
-            response.put("ERROR", "TRUE");
-            response.put("message", "User not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
+        String token = Authorization.replace(PREFIX,"");
         try{
-            userService.delete(userModelOptional.get());
-            response.put("message", "User successfully deleted");
-            return ResponseEntity.status(HttpStatus.OK).body(response);
+            String email = validateToken(token);
+            if(email == null){
+                response.put("ERROR","True");
+                response.put("message","Login required/Invalid token");
+                response.put("Authorization","Bearer token");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+            Optional<UserModel> userModelOptionalEmail = userService.findByEmail(email);
+            if(!userModelOptionalEmail.isPresent()){
+                response.put("ERROR","True");
+                response.put("message","Invalid token");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+
+            Optional<UserModel> userModelOptional = userService.findById(id);
+            if(!userModelOptional.isPresent()){
+                response.put("ERROR", "TRUE");
+                response.put("message", "User not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            if(userModelOptionalEmail.get().getIs_admin() || userModelOptionalEmail.get().getId() == userModelOptional.get().getId()){
+                try{
+                    userService.delete(userModelOptional.get());
+                    response.put("message", "User successfully deleted");
+                    return ResponseEntity.status(HttpStatus.OK).body(response);
+                }catch (Exception e){
+                    response.put("ERROR", "TRUE");
+                    response.put("message", "Could not delete user");
+                    response.put("err", e.getCause().getLocalizedMessage());
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+                }
+            }
+            response.put("ERROR","True");
+            response.put("message","UNAUTHORIZED");
+            response.put("Owner/Admin","Only the owner or admin can delete a user");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }catch (Exception e){
-            response.put("ERROR", "TRUE");
-            response.put("message", "Could not delete user");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            response.put("ERROR","True");
+            response.put("message","Login required/Invalid token");
+            response.put("Authorization","Bearer token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
+
+
+
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateUser(@PathVariable(value = "id")Long id,@RequestBody @Valid UserDto userDto){
+    public ResponseEntity<Object> updateUser(@PathVariable(value = "id")Long id,@RequestBody @Valid UserDto userDto,@RequestHeader String Authorization){
 
         Map<String, String> response = new HashMap<>();
-        Optional<UserModel> userModelOptional = userService.findById(id);
-        if(!userModelOptional.isPresent()){
-            response.put("ERROR", "TRUE");
-            response.put("message", "User not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
-        int sum = 0;
-        var userModel = userModelOptional.get();
-        if(userDto.getName()!=null){ userModel.setName(userDto.getName());}else {sum++;}
-        if(userDto.getEmail()!=null){ userModel.setEmail(userDto.getEmail());}else {sum++;}
-        if(userDto.getPassword()!=null){userModel.setPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));}else {sum++;}
-        if(sum ==3){
-            response.put("message","Possible fields to update: (name, email, password)");
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
-        }
-        userModel.setUpdatedAt(LocalDateTime.now());
+        String token = Authorization.replace(PREFIX,"");
         try{
-            userService.save(userModel);
-            response.put("message", "User updated successfully");
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        }catch (Exception e){
-            String error = e.getCause().getCause().getMessage();
-            response.put("ERROR", "TRUE");
-            if(error.contains("Duplicate entry")){
-                response.put("message", "E-mail already exists");
-            }else {
-                response.put("message", "Could not update user");
+            String email = validateToken(token);
+            if(email == null){
+                response.put("ERROR","True");
+                response.put("message","Login required/Invalid token");
+                response.put("Authorization","Bearer token");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            Optional<UserModel> userModelOptionalEmail = userService.findByEmail(email);
+            if(!userModelOptionalEmail.isPresent()){
+                response.put("ERROR","True");
+                response.put("message","Invalid token");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+
+            Optional<UserModel> userModelOptional = userService.findById(id);
+            if(!userModelOptional.isPresent()){
+                response.put("ERROR", "TRUE");
+                response.put("message", "User not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            if(userModelOptionalEmail.get().getIs_admin() || userModelOptionalEmail.get().getId() == id){
+                int sum = 0;
+                var userModel = userModelOptional.get();
+                if(userDto.getName()!=null){ userModel.setName(userDto.getName());}else {sum++;}
+                if(userDto.getEmail()!=null){ userModel.setEmail(userDto.getEmail());}else {sum++;}
+                if(userDto.getPassword()!=null){userModel.setPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));}else {sum++;}
+                if(sum ==3){
+                    response.put("message","Possible fields to update: (name, email, password)");
+                    return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+                }
+                userModel.setUpdatedAt(LocalDateTime.now());
+                try{
+                    userService.save(userModel);
+                    response.put("message", "User updated successfully");
+                    return ResponseEntity.status(HttpStatus.OK).body(response);
+                }catch (Exception e){
+                    String error = e.getCause().getCause().getMessage();
+                    response.put("ERROR", "TRUE");
+                    if(error.contains("Duplicate entry")){
+                        response.put("message", "E-mail already exists");
+                    }else {
+                        response.put("message", "Could not update user");
+                        response.put("err", error);
+                    }
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+                }
+            }
+            response.put("ERROR","True");
+            response.put("message","UNAUTHORIZED");
+            response.put("Owner/Admin","Only the owner or admin can update a user");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }catch (Exception e){
+            response.put("ERROR","True");
+            response.put("message","Login required/Invalid token");
+            response.put("Authorization","Bearer token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
     @PostMapping("/login")
     public ResponseEntity<Object> loginUser(@RequestBody @Valid LoginDto loginDto) {
         Map<String, String> response = new HashMap<>();
         Optional<UserModel> userModelOptional = userService.findByEmail(loginDto.getEmail());
-        Dotenv dotenv = Dotenv.load();
+
         if (userModelOptional.isEmpty()) {
             response.put("ERROR", "TRUE");
             response.put("message", "User not found");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
-
+        Dotenv dotenv = Dotenv.load();
         var user = userModelOptional.get();
         boolean valid = bCryptPasswordEncoder.matches(loginDto.getPassword(), user.getPassword());
         if(valid){
-            String is_admin = user.getIs_admin()?"true":"false";
-
             String token = JWT.create().withSubject(user.getEmail()).
                     withExpiresAt(new Date(System.currentTimeMillis() + Integer.parseInt(dotenv.get("TOKEN_EXPIRATION")))).
                     sign(Algorithm.HMAC512(dotenv.get("TOKEN_SECRET")));
